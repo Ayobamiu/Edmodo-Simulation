@@ -1,0 +1,341 @@
+  <title>Course Information</title>
+  <link rel="shortcut icon" href="http://www.rmit.edu.vn/sites/all/themes/rmit/images/rmit-university-vietnam.jpg" type="image/x-icon" />
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/css/bootstrap-select.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/bootstrap-select.min.js"></script>
+
+<!-- (Optional) Latest compiled and minified JavaScript translation files -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.2/js/i18n/defaults-*.min.js"></script>
+
+<style>
+label {
+  color: #DF2B07;
+}
+
+</style>
+
+<script>
+
+$(function(){
+
+$.ajax({
+
+url: "/courses",
+
+method: "get",
+
+success: function(data){
+
+for(i=0; i<data.length; i++){
+
+$('#courseList').append("<a class='list-group-item' courseName='"+data[i].name+"' courseId='"+data[i]._id+"' courseCode='"+data[i].code+"'>"+data[i].name+"</a>");
+
+}
+
+}
+
+});
+
+$('#courseList').on('click', 'a', function(){
+
+id = $(this).attr("courseId");
+name = $(this).attr("courseName");
+code = $(this).attr("courseCode");
+
+  $('#selectedCourse').html(id);
+    $('#selectedCourseName').html(name);
+        $('#selectedCourseCode').html(code);
+
+      //now get all enrolled students of this course
+    //clear before append
+    $('#enrolledStudents').html('');
+
+    $.ajax({
+      url: 'studentByCourse/'+id,
+      method: 'get',
+      success: function(data){
+        for(i=0; i<data.length; i++){ 
+          $('#enrolledStudents').append("<a class='list-group-item' value='"+data[i]._id+"'>"+data[i].name+"</a>");
+        }
+      }
+    });
+
+    //now get all available students who have not enrolled to this course
+    //clear before append
+    $('#availableStudents').html('');
+    $.ajax({
+      url: 'availableStudentByCourse/'+id,
+      method: 'get',
+      success: function(data){
+        console.log(data);
+        for(i=0; i<data.length; i++){ 
+          $('#availableStudents').append("<a class='list-group-item' value='"+data[i]._id+"' >"+data[i].name+"</a>");
+        }
+      }
+    });
+    //
+      $('#availableStudents').on('dblclick', 'a', function(){
+    var id = $(this).attr('value');
+    var enrolment = {'courseId': $('#selectedCourse').html() , 'studentId': id};
+
+    $.ajax({
+      url: '/enrolment',
+      method: 'post',
+      data: enrolment,
+      success: function(doc){
+        alert('Success');
+      }
+
+    });
+    $(this).remove();
+     location.reload();
+  }); 
+
+$.ajax({
+
+url: "/course/"+id,
+
+method: "get",
+
+success: function(data){
+
+$('#name').val(data.name);
+
+$('#code').val(data.code);
+
+$('#id').val(data._id);
+
+}
+
+});
+
+});
+
+});
+
+function saveOrUpdate(){
+
+id = $('#id').val();
+
+if(id==='')
+
+add();
+
+else
+
+update();
+
+}
+
+function update(){
+
+course = {"name": $('#name').val(), "code": $('#code').val()};
+
+id = $('#id').val();
+
+$.ajax({
+
+url: "/course/"+id,
+
+method: "put",
+
+dataType: "json",
+
+data: course,
+
+success: function(data){
+  location.reload();
+
+$('#courseList').append("<a class='list-group-item' courseName='"+data[i].name+"' courseId='"+data[i]._id+"' courseCode='"+data[i].code+"'>"+data.name+"</a>");
+
+
+}
+});
+
+
+}
+
+function add(){
+
+course = {"name": $('#name').val(), "code": $('#code').val()};
+
+$.ajax({
+
+url: "/courses",
+
+method: "post",
+
+dataType: "json",
+
+data: course,
+
+success: function(data){
+   location.reload();
+
+$('#courseList').append("<a class='list-group-item' courseName='"+data[i].name+"' courseId='"+data[i]._id+"' courseCode='"+data[i].code+"'>"+data.name+"</a>");
+
+}
+
+});
+
+}
+
+function remove(){
+   if (confirm('Do you want to remove this course?')) {
+
+id = $('#id').val();
+
+$.ajax({
+
+url: "/course/"+id,
+
+method: "delete",
+
+dataType: "json",
+
+success: function(data){
+
+alert('Remove successfully');
+location.reload();
+
+}
+
+});
+
+}
+}
+
+</script>
+<style>
+.form-field {
+	 border: solid 2px #006699;
+}
+.list-group-item {
+
+	 font-size: medium
+}
+
+.btn1 {
+  background-color: #006699; 
+  color: #FFFFFF;
+  border-color: #006699;
+}
+.btn1:hover {
+  background-color: #FFFFFF; 
+  color:  #006699;
+  border: solid 2px #006699;
+}
+h3 {
+	color: #006699;
+}
+
+
+label {
+  color: #006699;
+}
+
+</style>
+
+<div class='container-fluid'>
+
+<div class='row'>
+
+<div class="col-sm-12">
+<div class="panel panel-default" style="font-weight: bold ; ">
+<!-- Header Panel -->
+    <div class="panel-heading" style="background-color: #000000; color: #FFFFFF"; >
+       <div class='col-sm-1'>
+ <img src="https://astrolightvic.files.wordpress.com/2016/08/rmit-logo.png" class="img-fluid" alt="Responsive image" style="width: 100">
+
+</div>
+ <h4>Course Management Tool</h4>
+     </div>
+    <div class="panel-body">
+    <div class="col-sm-4">
+
+    <!-- Course list -->
+<div class="panel panel-default" style="font-weight: bold ; ">
+    <div class="panel-heading" style="color: #004466; text-align: center;"  >
+        <h4>Course List</h4>
+     </div>
+    <div class="panel-body">
+    <div id='courseList' class='list-group'></div>
+  </div>
+    </div>
+    </div>
+ <!--  -->
+
+ <!--Course Form -->
+   <div class="col-sm-8">
+<div class="panel panel-default" style="font-weight: bold ; ">
+    <div class="panel-heading" style="background-color: #006699; color: #FFFFFF; text-align: center;" >
+        <h4>Course Form</h4>
+     </div>
+    <div class="panel-body">
+    <form id="submit">
+    <label class='form-label'>Course ID</label>
+
+<input tye='text' class='form-control form-field' name='id' id='id' readonly/>
+
+<label class='form-label'>Course Name</label>
+
+<input type='text' class='form-control form-field' name='name' id='name' required/>
+
+<label class='form-label'>Course Code</label>
+
+<input type='text' class='form-control form-field' name='code' id='code' required/>
+<br>
+
+<input type='button' class="btn btn1" value='Save' onclick='saveOrUpdate();' />
+
+<input type='button' class="btn btn1" value='Add new' onclick='add();' />
+
+<input type='button' class="btn btn1" value='Remove' onclick="remove();" />
+</form>
+  </div>
+    </div>
+<!--   -->
+<div class="panel panel-default" style="font-weight: bold ; ">
+    <div class="panel-heading" style="background-color: #000000; color: #FFFFFF; text-align: center;" >
+        <h4>Student Enrolling To Course Tool </h4>
+     </div>
+    <div class="panel-body">
+<div style ="border: 2px solid #006699; text-align: center;  border-radius: 25px; ">
+ <h4>Selected Course ID: <span id='selectedCourse'></span></h4>
+        <h4>Selected Course Name: <span id='selectedCourseName'></span></h4>
+        <h4>Selected Course Code: <span id='selectedCourseCode'></span></h4>
+</div>
+<br>
+<label class='form-label'>Available Students</label>
+ <div id='availableStudents'></div>
+ <br>
+ <label class='form-label'>Enrolled Students</label>
+<div id='enrolledStudents'></div>
+    
+
+
+<br><br>
+
+
+  </div>
+    </div>
+    </div>
+
+    </div>
+    </div>
+    </div>
+    </div>
+</div>
+
+</div>

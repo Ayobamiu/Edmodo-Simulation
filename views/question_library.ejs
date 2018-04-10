@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Question Library</title>
+  <link rel="shortcut icon" href="http://www.rmit.edu.vn/sites/all/themes/rmit/images/rmit-university-vietnam.jpg" type="image/x-icon" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+  <!-- CSSS Design  -->
+<style>
+.list-group-item:hover {
+    background-color: #337ab7;
+    color: white;
+  }
+.input-group-addon {
+  background-color: #DF2B07;
+  color: #FFFFFF;
+
+}
+.selectpicker {
+  background-color: #DF2B07; 
+  color: #FFFFFF;
+  border-color: #DF2B07;
+}
+  .selectpicker:hover {
+    background-color: #FFFFFF; 
+    color: #DF2B07;
+    border: solid 1px #DF2B07;
+}
+#questionpanel {
+  background-color: #DF2B07; 
+    color: #FFFFFF;
+  border: solid 2px #DF2B07;
+
+}
+
+#quizpanel {
+  background-color: #006699; 
+  color: #FFFFFF;
+  border-color:  #006699;
+
+}
+
+
+.quizList {
+  background-color: #FFFFFF; 
+  border: solid 2px #000000;
+}
+
+#questionbody {
+  background-color:white;
+  color: #DF2B07;
+ border: solid 2px #DF2B07;
+}
+
+#quizbody {
+    background-color: #FFFFFF; 
+    color: #000000;
+    border: solid 2px  #006699;
+}
+
+#panelrightheading {
+background-color: #FFFFFF; 
+border: solid 2px #DF2B07;
+
+}
+.panel-right-body {
+  border: 2px solid #DF2B07;
+}
+.CorrectAnswer {
+   background-color: #000000;
+}
+.ColumnA {
+  background-color: #000000;
+}
+.ColumnB {
+  background-color:  #DF2B07;
+}
+
+label {
+  color:  #000000;
+}
+.form-field {
+   border: solid 2px #006699;
+}
+
+.question {
+   background-color: #000000;
+}
+
+.btn {
+  background-color: #006699; 
+  color: #FFFFFF;
+  border-color: #006699;
+}
+.btn:hover {
+  background-color: #FFFFFF; 
+  color:  #006699;
+  border: solid 2px #006699;
+}
+
+</style>
+
+  <!--   -->
+
+<!--Hide/Show Effect Question Type Dropdown -->
+<script>
+$(document).ready(function(){
+    $("select").change(function(){
+        $(this).find("option:selected").each(function(){
+            var optionValue = $(this).attr("value");
+
+            ///////////////// MULTIPLE CHOICE 
+
+            if(optionValue=='QType'){
+
+               $(".ShortAnswer").hide();
+                $(".Matching").hide();
+                 $(".TrueFalse").hide();
+                  $(".GapFilling").hide();
+                   $(".MultipleChoice").hide();
+
+            }else if(optionValue=='MultipleChoice'){
+
+               $(".ShortAnswer").hide();
+                $(".Matching").hide();
+                 $(".TrueFalse").hide();
+                  $(".GapFilling").hide();
+                   $(".MultipleChoice").show();
+                
+
+            
+            
+
+              //////////////////////////
+
+
+              ////////// SHORT ANSWER
+
+            }else if(optionValue=='ShortAnswer'){
+               $(".MultipleChoice").hide();
+                $(".Matching").hide();
+                 $(".TrueFalse").hide();
+                  $(".GapFilling").hide();
+                   $(".ShortAnswer").show();
+
+
+
+
+               /////////////////
+
+               ////////// GAP FILLING 
+
+                }else if(optionValue=='GapFilling'){
+               $(".MultipleChoice").hide();
+                $(".Matching").hide();
+                 $(".TrueFalse").hide();
+                  $(".ShortAnswer").hide();
+                   $(".GapFilling").show();
+
+
+                 
+
+               ////////////////
+
+               ////// MATCHING
+                 }else if(optionValue=='Matching'){
+               $(".MultipleChoice").hide();
+                $(".ShortAnswer").hide();
+                 $(".TrueFalse").hide();
+                  $(".GapFilling").hide();
+                   $(".Matching").show();
+
+               /////////////////
+                ////////// SHORT ANSWER
+
+            }else if(optionValue=='TrueFalse'){
+               $(".MultipleChoice").hide();
+                $(".Matching").hide();
+                 $(".ShortAnswer").hide();
+                  $(".GapFilling").hide();
+                   $(".TrueFalse").show();
+
+
+     
+
+
+               /////////////////
+
+
+            }
+        });
+    }).change();
+});
+</script>
+
+  
+</script>
+
+
+<!-- ADD QUESTION DATA TO MONGODB  -->
+<script>
+
+$(function(){
+
+$.ajax({
+
+url: "/questions",
+
+method: "get",
+
+success: function(data){
+
+for(i=0; i<data.length; i++){
+
+$('#question').append("<a class='list-group-item' value='"+data[i]._id+"'>"+data[i].name+"</a>");
+
+}
+
+}
+
+});
+
+$('#question').on('click', 'a', function(){
+
+id = $(this).attr("value");
+
+$.ajax({
+
+url: "/question/"+id,
+
+method: "get",
+
+success: function(data){
+
+$('#name').val(data.name);
+
+$('#questionType').val(data.questionType);
+
+$('#id').val(data._id);
+
+$('#mcquestionPrompt').val(data.mcquestionPrompt);
+
+$('#mcCorrectAnswer').val(data.mcCorrectAnswer);
+
+$('#mcWrongAnswer1').val(data.mcWrongAnswer1);
+
+$('#mcWrongAnswer2').val(data.mcWrongAnswer2);
+
+$('#mcWrongAnswer3').val(data.mcWrongAnswer3);
+
+$('#saquestionPrompt').val(data.saquestionPrompt);
+
+$('#saCorrectAnswer').val(data.saCorrectAnswer);
+
+$('#tfquestionPrompt').val(data.tfquestionPrompt);
+
+$('#tfCorrectAnswer').val(data.tfCorrectAnswer);
+
+$('#gfquestionPrompt').val(data.gfquestionPrompt);
+
+$('#gfCorrectAnswer').val(data.gfCorrectAnswer);
+
+$('#maquestionPrompt').val(data.maquestionPrompt);
+
+$('#macolA1').val(data.macolA1);
+
+$('#macolB1').val(data.macolB1);
+
+$('#macolA2').val(data.macolA2);
+
+$('#macolB2').val(data.macolB2);
+
+$('#macolA3').val(data.macolA3);
+
+$('#macolB3').val(data.macolB3);
+
+$('#macolA4').val(data.macolA4);
+
+$('#macolB4').val(data.macolB4);
+}
+
+});
+
+});
+
+});
+
+function saveOrUpdate(){
+
+id = $('#id').val();
+
+if(id==='')
+
+add();
+
+else
+
+update();
+
+}
+
+function update(){
+
+question = {"name": $('#name').val(), "questionType": $('#questionType').val(), "mcquestionPrompt": $('#mcquestionPrompt').val(), "mcCorrectAnswer": $('#mcCorrectAnswer').val(), "mcWrongAnswer1": $('#mcWrongAnswer1').val(),  "mcWrongAnswer2": $('#mcWrongAnswer2').val(),  "mcWrongAnswer3": $('#mcWrongAnswer3').val(), "saquestionPrompt": $('#saquestionPrompt').val(),"saCorrectAnswer": $('#saCorrectAnswer').val(), "tfquestionPrompt": $('#tfquestionPrompt').val(), "tfCorrectAnswer": $('#tfCorrectAnswer').val(), "gfquestionPrompt": $('#gfquestionPrompt').val(), "gfCorrectAnswer": $('#gfCorrectAnswer').val(), "maquestionPrompt": $('#maquestionPrompt').val(), "macolA1": $('#macolA1').val(),"macolB1": $('#macolB1').val(), "macolA2": $('#macolA2').val(), "macolB2": $('#macolB2').val(), "macolA3": $('#macolA3').val(),"macolB3": $('#macolB3').val(), "macolA4": $('#macolA4').val(),"macolB4": $('#macolB4').val() };
+id = $('#id').val();
+
+$.ajax({
+
+url: "/question/"+id,
+
+method: "put",
+
+dataType: "json",
+
+data: question,
+
+success: function(data){
+
+$('#question').append("<a class='list-group-item' value='"+data[i]._id+"'>"+data[i].name+"</a>");
+}
+
+});
+location.reload();
+}
+
+function add(){
+
+question = {"name": $('#name').val(), "questionType": $('#questionType').val(), "mcquestionPrompt": $('#mcquestionPrompt').val(), "mcCorrectAnswer": $('#mcCorrectAnswer').val(), "mcWrongAnswer1": $('#mcWrongAnswer1').val(),  "mcWrongAnswer2": $('#mcWrongAnswer2').val(),  "mcWrongAnswer3": $('#mcWrongAnswer3').val(), "saquestionPrompt": $('#saquestionPrompt').val(),"saCorrectAnswer": $('#saCorrectAnswer').val(), "tfquestionPrompt": $('#tfquestionPrompt').val(), "tfCorrectAnswer": $('#tfCorrectAnswer').val(), "gfquestionPrompt": $('#gfquestionPrompt').val(), "gfCorrectAnswer": $('#gfCorrectAnswer').val(), "maquestionPrompt": $('#maquestionPrompt').val(), "macolA1": $('#macolA1').val(),"macolB1": $('#macolB1').val(), "macolA2": $('#macolA2').val(), "macolB2": $('#macolB2').val(), "macolA3": $('#macolA3').val(),"macolB3": $('#macolB3').val(), "macolA4": $('#macolA4').val(),"macolB4": $('#macolB4').val() };
+$.ajax({
+
+url: "/questions",
+
+method: "post",
+
+dataType: "json",
+
+data: question,
+
+success: function(data){
+
+$('#question').append("<a class='list-group-item' value='"+data._id+"'>"+data.name+"</a>");
+
+}
+
+});
+
+}
+
+function remove(){
+
+id = $('#id').val();
+
+$.ajax({
+
+url: "/question/"+id,
+
+method: "delete",
+
+dataType: "json",
+
+success: function(data){
+
+alert('Remove successfully');
+location.reload();
+}
+
+});
+
+}
+
+</script>
+
+
+<!--    -->
+<!--  -->
+</head>
+
+<!-- body -->
+
+<body>
+<div class="container-fluid">
+<form>
+
+<!-- Header -->
+<!--Quiz Title-->
+<div class="container-fluid" ; style="text-align:center">
+ <div class="row"> 
+ <div class="col-sm-3">
+ <img src="https://astrolightvic.files.wordpress.com/2016/08/rmit-logo.png" class="img-fluid" alt="Responsive image" style="width: 50%">
+ </div>
+ 
+
+
+    
+  </div>
+<br>
+<!-- body -->
+<div class="row"> 
+
+ <!--Left panel -->
+ 
+      <div class="panel panel-default" style="text-align:center ; font-weight: bold ">
+    <div class="panel-heading" id="quizpanel"> QUESTION DATABASE</div>
+    <div class="panel-body" id="quizmain2">
+
+
+
+     <div class="col-sm-3" id="qwes">
+    <div class="panel panel-default" style="text-align:center ; font-weight: bold ">
+    <div class="panel-heading" id="questionpanel">QUESTION TABLE </div>
+    <div class="panel-body" id="questionbody1">
+
+<div class='list-group questionlist' id='question'></div>
+       
+
+
+        </div>
+    </div>
+
+
+  </div>
+
+
+  <div class="col-sm-9" style="border-bottom: 0px" id="rightpanel">
+    <div  id="qright">
+    <!--Right Panel Heading -->
+    <div class="panel-heading" style="text-align:center ; font-weight: bold " id="panelrightheading1">
+    <div class="row"> 
+    <!-- Question Type -->
+    <div class="col-sm-4">
+        <label class='form-label'>Question ID</label>
+
+<input tye='text' class='form-control form-field' name='id' id='id' readonly/>
+<br>
+    <label class='form-label'>Question Title </label>
+
+<input tye='text' class='form-control form-field' name='name' id='name' />
+<br>    
+
+<label class='form-label'>Question Type </label>
+<br>
+   
+ <select class='selectpicker  btn btn-lg' id='questionType' name="questionType">
+<option value='MultipleChoice'>Multiple Choices</option>
+<option value='TrueFalse'>True/False</option>
+<option value='GapFilling'>Gap filling</option>
+<option value='ShortAnswer'>Short Answer</option>
+<option value='Matching'>Matching</option>
+</select>
+
+    </div>
+    <div class="col-sm-8">
+    <input type='button' class="btn btn-lg" value='Save Question' onclick='saveOrUpdate();' />
+
+<input type='button' class="btn btn-lg" value='Add New Question' onclick='add();' />
+
+<input type='button' class="btn btn-lg" value='Remove Question' onclick="remove();" />
+
+    </div>
+
+   </div>
+   
+
+<br>
+
+    <div class='MultipleChoice box' >
+    <div class='input-group-addon question' style='font-weight: bold'>Question Prompt</div>
+    <textarea class='form-control' rows='6' id='mcquestionPrompt' name="mcquestionPrompt"></textarea>
+    <br>
+     
+    <div class='input-group-addon CorrectAnswer' style='font-weight: bold'>Correct Answer</div>
+    <textarea class='form-control' rows='3' id='mcCorrectAnswer' name="mcCorrectAnswer"  ></textarea>
+    <br>
+    <div class='col-sm-12'>
+    
+    <div class='input-group-addon WrongAnswer' style='font-weight: bold'>Wrong Answer</div>
+    <textarea class='form-control' rows='3' id='mcWrongAnswer1' name="mcWrongAnswer1" ></textarea>
+    <br>
+   
+    </div>
+     <div class='col-sm-12'>
+    
+    <div class='input-group-addon WrongAnswer' style='font-weight: bold'>Wrong Answer</div>
+    <textarea class='form-control' rows='3' id='mcWrongAnswer2' name="mcWrongAnswer2"  ></textarea>
+    <br>
+    
+    </div>
+     <div class='col-sm-12'>
+    
+    <div class='input-group-addon WrongAnswer' style='font-weight: bold'>Wrong Answer</div>
+    <textarea class='form-control' rows='3' id='mcWrongAnswer3' name="mcWrongAnswer3"></textarea>
+    <br>
+  
+    </div>
+
+    <br>
+    </div>
+<div class='ShortAnswer box'>
+    <div class='input-group-addon question' style='font-weight: bold'>Question Prompt</div>
+    <textarea class='form-control' rows='6' id='saquestionPrompt' name="saquestionPrompt" ></textarea>
+    <br>
+     
+    <div class='input-group-addon CorrectAnswer' style='font-weight: bold'>Correct Answer</div>
+    <textarea class='form-control' rows='3'  id="saCorrectAnswer" name="saCorrectAnswer"></textarea>
+    <br>
+    </div>
+    <div class='GapFilling box' >
+    <div class='input-group-addon question' style='font-weight: bold'>Question Prompt</div>
+    <textarea class='form-control' rows='6' id='gfquestionPrompt' name='gfquestionPrompt' ></textarea>
+    <br>
+     <h4>Please use underscore ( _ ) to specify the blank in Question Prompt Box and put the correct answer in blank in single quote ( ' ' ) in Correct Answer Box</h4>
+    <div class='input-group-addon CorrectAnswer' style='font-weight: bold'>Correct Answer</div>
+    <textarea class='form-control' rows='6' id='gfCorrectAnswer' name='gfCorrectAnswer' ></textarea>
+    <br>
+    </div>
+
+     <div class='TrueFalse box' >
+    <div class='input-group-addon question' style='font-weight: bold'>Question Prompt</div>
+    <textarea class='form-control' rows='6' id='tfquestionPrompt' name='tfquestionPrompt'></textarea>
+    <br>
+    <div class='input-group-addon CorrectAnswer' style='font-weight: bold'>Correct Answer</div><br>
+     <select class='selectpicker  btn btn-lg' id='tfCorrectAnswer' name='tfCorrectAnswer'><option value='True'>True</option><option value='False'>False</option></select>
+    <br>
+    </div>
+   
+   <div class='Matching box' >
+    <div class='input-group-addon question' style='font-weight: bold'>Question Prompt</div>
+    <textarea class='form-control' rows='6' id='maquestionPrompt' name='maquestionPrompt' ></textarea>
+    <br>
+     
+   
+    <div class='col-sm-6'>
+    <div class='input-group-addon ColumnA' style='font-weight: bold'>Column A</div>
+    <textarea class='form-control' rows='6' id='macolA1' name='macolA1'></textarea>
+    </div>
+    <div class='col-sm-6'>
+    <div class='input-group-addon ColumnB' style='font-weight: bold'>Column B</div>
+    <textarea class='form-control' rows='6' id='macolB1' name='macolB1'></textarea>
+    <br>
+    </div>
+
+    <div class='col-sm-6'>
+    <div class='input-group-addon ColumnA' style='font-weight: bold'>Column A</div>
+    <textarea class='form-control' rows='6' id='macolA2' name='macolA2'></textarea>
+    </div>
+    <div class='col-sm-6'>
+    <div class='input-group-addon ColumnB' style='font-weight: bold'>Column B</div>
+    <textarea class='form-control' rows='6' id='macolB2' name='macolB2'></textarea>
+    <br>
+    </div>
+
+    <div class='col-sm-6'>
+    <div class='input-group-addon ColumnA' style='font-weight: bold'>Column A</div>
+    <textarea class='form-control' rows='6' id='macolA3' name='macolA3'></textarea>
+    </div>
+    <div class='col-sm-6'>
+    <div class='input-group-addon ColumnB' style='font-weight: bold'>Column B</div>
+    <textarea class='form-control' rows='6' id='macolB3' name='macolB3'></textarea>
+    <br>
+    </div>
+
+    <div class='col-sm-6'>
+    <div class='input-group-addon ColumnA' style='font-weight: bold'>Column A</div>
+    <textarea class='form-control' rows='6' id='macolA4' name='macolA4'></textarea>
+    </div>
+    <div class='col-sm-6'>
+    <div class='input-group-addon ColumnB' style='font-weight: bold'>Column B</div>
+    <textarea class='form-control' rows='6' id='macolB4' name='macolB4'></textarea>
+    <br>
+    </div>
+    </div>
+    <br>
+    </div>
+    </div>
+    </div>
+    <br>
+
+<br><br><br>
+
+    
+
+   
+    </div>
+    </div>
+       
+        </div>
+    </div>
+ <!--ADD/ REMOVE QUESTIONS -->
+ 
+  <!--  -->
+
+
+<!-- -->
+
+   </div>
+
+ 
+
+    </div>
+    </div>
+    </div>
+
+
+
+</form>
+</div>
+</body>
+</html>

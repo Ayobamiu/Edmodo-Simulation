@@ -1,0 +1,366 @@
+  <title>Teaching Document Library</title>
+  <link rel="shortcut icon" href="http://www.rmit.edu.vn/sites/all/themes/rmit/images/rmit-university-vietnam.jpg" type="image/x-icon" />
+
+<!-- Latest compiled and minified CSS -->
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- CREATE DIRECTORY FUNCTION -->
+
+<script>
+
+$(function(){
+
+$.ajax({
+
+url: "/folders",
+
+method: "get",
+
+success: function(data){
+
+for(i=0; i<data.length; i++){
+
+$('#DirectoryList').append("<a class='list-group-item' DirectoryName='"+data[i].name+"' DirectoryId='"+data[i]._id+"'>"+data[i].name+"</a>");
+
+
+}
+
+}
+
+});
+
+$('#DirectoryList').on('click', 'a', function(){
+
+id = $(this).attr("DirectoryId");
+name = $(this).attr("DirectoryName");
+$('#selectedDirectoryName').html(name);
+
+$.ajax({
+
+url: "/folder/"+id,
+
+method: "get",
+
+success: function(data){
+
+$('#name').val(data.name);
+
+$('#id').val(data._id);
+
+}
+
+});
+
+});
+
+});
+
+function saveOrUpdate(){
+
+id = $('#id').val();
+name = $('#name').val();
+
+if(id==='')
+
+add();
+
+else
+
+update();
+
+}
+
+function update(){
+
+folder = {"name": $('#name').val()};
+
+id = $('#id').val();
+name = $('#name').val();
+
+
+$.ajax({
+
+url: "/folder/"+id,
+
+method: "put",
+
+dataType: "json",
+
+data: folder,
+
+success: function(data){
+  location.reload();
+
+$('#DirectoryList').append("<a class='list-group-item' DirectoryName='"+data[i].name+"' DirectoryId='"+data[i]._id+"'>"+data.name+"</a>");
+
+
+ 
+}
+});
+
+
+}
+
+function add(){
+
+folder = {"name": $('#name').val()};
+
+$.ajax({
+
+url: "/folders",
+
+method: "post",
+
+dataType: "json",
+
+data: folder,
+
+success: function(data){
+
+$('#DirectoryList').append("<a class='list-group-item' value='"+data._id+"'>"+data.name+"</a>");
+
+location.reload();
+
+
+
+}
+
+});
+
+}
+
+function remove(){
+   if (confirm('Do you want to remove this directory?')) {
+
+id = $('#id').val();
+
+$.ajax({
+
+url: "/folder/"+id,
+
+method: "delete",
+
+dataType: "json",
+
+success: function(data){
+
+alert('Remove successfully');
+location.reload();
+
+}
+
+});
+
+}
+}
+</script>
+
+<!-- UPLOADING TOOL -->
+
+<script>
+
+$('#uploadForm').submit(function() {
+
+$("#status").empty().text("File is uploading...");
+
+$(this).ajaxSubmit({
+
+success: function(response) {
+
+console.log(response)
+
+$("#status").empty().text(response);
+}
+
+});
+
+return false;
+
+});
+
+</script>
+
+<!-- SELECT MENU FUNCTION -->
+<script>
+$(document).ready(function(){
+    $("select").change(function(){
+        $(this).find("option:selected").each(function(){
+            var optionValue = $(this).attr("value");
+
+            ///////////////// MULTIPLE CHOICE 
+
+            if(optionValue=='DirectoryList'){
+
+               $(".FileList").hide();
+                $(".DirectoryList").show();
+         }else if(optionValue=='FileList'){
+                $(".DirectoryList").hide();
+                $(".FileList").show();
+            }
+        });
+    }).change();
+});
+ </script>
+<!-- -->
+<style>
+
+.form-field {
+   border: solid 2px #006699;
+}
+.list-group-item {
+  
+   font-size: medium
+}
+.btn {
+  background-color: #004466; 
+  color: #FFFFFF;
+  border-color: #004466;
+}
+.btn:hover {
+  background-color: #FFFFFF; 
+  color: #004466;
+  border: solid 2px #004466;
+}
+label{
+  color: #006699;
+}
+
+</style>
+
+<!--               -->
+<!--  BODY -->
+
+<div class='container-fluid'>
+
+<div class='row'>
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Add New Folder</h4>
+        </div>
+        <div class="modal-body">
+         <label class='form-label'>Directory Name</label>
+          <input type='text' class='form-control form-field' name='name' id='name' required/>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal" onclick='add();'>Add New Folder</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+
+<div class='col-sm-12'>
+<div class="panel panel-default" style="font-weight: bold ">
+    <div class="panel-heading" style="background-color: #000000; color: #FFFFFF"; >
+
+   <div class='col-sm-1'>
+ <img src="https://astrolightvic.files.wordpress.com/2016/08/rmit-logo.png" class="img-fluid" alt="Responsive image" style="width: 100">
+
+</div>
+        <select class='selectpicker  btn btn-lg' id='questionType'>
+<option value='DirectoryList'>Directory Library</option>
+<option value='FileList'>File Library</option>
+</select>
+
+     </div>
+    <div class="panel-body">
+<!-- Directory Library -->
+     <div class="DirectoryList box">
+ <!-- Directory List -->
+ <div class='col-md-4'>
+ <div class="panel panel-default" style="text-align:center ; font-weight: bold ; ">
+    <div class="panel-heading" style="background-color: #004466; color: #FFFFFF"; >DIRECTORY LIST </div>
+    <div class="panel-body">
+<div id='DirectoryList' class='list-group'></div>
+
+<input type='button' class="btn btn2 btn-md" value='Add New Folder' data-toggle="modal" data-target="#myModal" />
+<input type='button' class="btn btn2 btn-md" value='Remove Folder' onclick="remove();" />
+</div>
+</div>
+</div>
+<div class='col-md-8'>
+<div class="panel panel-default" style="font-weight: bold ; ">
+    <div class="panel-heading" style="background-color: #006699; color: #FFFFFF; text-align: center;" >
+        <h4><div id='selectedDirectoryName'></div></h4>
+     </div>
+    <div class="panel-body">
+    <div class="col-sm-4">
+        <label class='form-label'>Directory ID</label>
+
+        <input tye='text' class='form-control form-field' name='id' id='id' readonly/>
+        </div>
+</div>
+</div>
+</div>
+</div>
+<!--   -->
+<!-- Uploading Tool -->
+<div class="FileList box">
+ <div class='col-md-4'>
+ <div class="panel panel-default" style="text-align:center ; font-weight: bold ; ">
+    <div class="panel-heading" style="background-color: #004466; color: #FFFFFF"; ><h4>File Upload Tool</h4></div>
+    <div class="panel-body">
+<label class='form-label'>Please choose files to upload</label>
+<form id="uploadForm"
+
+enctype="multipart/form-data"
+
+action="/uploads"
+
+method="post">
+
+<input type="file" name="userPhoto" multiple />
+<br>
+
+<input type="submit" value="Upload" name="submit"  class="btn">
+
+<br>
+
+<span id = "status"></span>
+
+</form>
+</div>
+</div>
+</div>
+
+<div class='col-md-8'>
+<div class="panel panel-default" style="font-weight: bold ; ">
+    <div class="panel-heading" style="background-color: #006699; color: #FFFFFF; text-align: center;"  >
+        <h4>File Library</h4>
+     </div>
+    <div class="panel-body" id="File">
+    <div class="col-sm-12">
+    </div>
+    </div>
+    </div>
+ 
+</div>
+</div>
+<!-- -->
+
+</div>
+</div>
+
+</div>
+</div> 
+
+</div>
+
+</div>

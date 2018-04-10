@@ -1,0 +1,270 @@
+  <title>Student Information</title>
+  <link rel="shortcut icon" href="http://www.rmit.edu.vn/sites/all/themes/rmit/images/rmit-university-vietnam.jpg" type="image/x-icon" />
+<!-- Latest compiled and minified CSS -->
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script>
+
+$(function(){
+
+$.ajax({
+
+url: "/students",
+
+method: "get",
+
+success: function(data){
+
+for(i=0; i<data.length; i++){
+
+$('#studentList').append("<a class='list-group-item' value='"+data[i]._id+"'>"+data[i].name+"</a>");
+
+}
+
+}
+
+});
+
+$('#studentList').on('click', 'a', function(){
+
+id = $(this).attr("value");
+
+$.ajax({
+
+url: "/student/"+id,
+
+method: "get",
+
+success: function(data){
+
+$('#name').val(data.name);
+
+$('#yob').val(data.yob);
+
+$('#id').val(data._id);
+
+}
+
+});
+
+});
+
+});
+
+function saveOrUpdate(){
+
+id = $('#id').val();
+
+if(id==='')
+
+add();
+
+else
+
+update();
+
+}
+
+function update(){
+
+student = {"name": $('#name').val(), "yob": $('#yob').val()};
+
+id = $('#id').val();
+
+$.ajax({
+
+url: "/student/"+id,
+
+method: "put",
+
+dataType: "json",
+
+data: student,
+
+success: function(data){
+
+$('#studentList').append("<a class='list-group-item' value='"+data._id+"'>"+data.name+"</a>");
+}
+
+
+});
+location.reload();
+
+}
+
+function add(){
+
+student = {"name": $('#name').val(), "yob": $('#yob').val()};
+
+$.ajax({
+
+url: "/students",
+
+method: "post",
+
+dataType: "json",
+
+data: student,
+
+success: function(data){
+
+$('#studentList').append("<a class='list-group-item' value='"+data._id+"'>"+data.name+"</a>");
+
+}
+
+});
+
+}
+
+function remove(){
+ if (confirm('Do you want to remove this student?')) {
+id = $('#id').val();
+
+$.ajax({
+
+url: "/student/"+id,
+
+method: "delete",
+
+dataType: "json",
+
+success: function(data){
+
+confirm('Remove successfully');
+location.reload();
+
+}
+
+});
+
+}
+}
+function search(){
+  $.ajax({
+    url: 'student/search/'+$('#studentSearch').val(),
+    method: 'get',
+    success: function(data){
+      console.log(data);
+    }
+
+  });
+}
+
+</script>
+
+<style>
+.form-field {
+	 border: solid 2px #006699;
+}
+.list-group-item {
+	
+	 font-size: medium
+}
+.btn {
+  background-color: #006699; 
+  color: #FFFFFF;
+  border-color: #006699;
+}
+.btn:hover {
+  background-color: #FFFFFF; 
+  color:  #006699;
+  border: solid 2px #006699;
+}
+label {
+	color: #006699;
+}
+
+.stylish-input-group .input-group-addon{
+    background: white !important; 
+}
+.stylish-input-group .form-control{
+  border-right:0; 
+  box-shadow:0 0 0; 
+  border-color:#ccc;
+}
+.stylish-input-group button{
+    border:0;
+    background:transparent;
+}
+
+</style>
+<!-- Header panel-->
+<div class='container-fluid'>
+
+<div class='row'>
+
+
+<div class="col-sm-12">
+<div class="panel panel-default" style="font-weight: bold ; ">
+    <div class="panel-heading" style="background-color: #000000; color: #FFFFFF"; >
+       <div class='col-sm-1'>
+ <img src="https://astrolightvic.files.wordpress.com/2016/08/rmit-logo.png" class="img-fluid" alt="Responsive image" style="width: 100">
+
+</div>
+
+ <h4>Student Management Tool</h4>
+     </div>
+     <!--  -->
+    <div class="panel-body">
+   <div class='col-sm-4'>
+<!--Student List-->
+<div class="panel panel-default" style="font-weight: bold ; ">
+    <div class="panel-heading" style="color: #004466; text-align: center;"" >
+        <h4>Student List</h4>
+     </div>
+    <div class="panel-body">
+           
+    <div id='studentList' class='list-group'></div>
+    </div>
+    </div>
+ 
+
+</div>
+<!-- -->
+
+<!-- Student Form-->
+<div class='col-sm-8'>
+
+<div class="panel panel-default" style="font-weight: bold ; ">
+    <div class="panel-heading" style="background-color: #006699; color: #FFFFFF; text-align: center;"  >
+        <h4>Student Form</h4>
+     </div>
+    <div class="panel-body">
+    <label class='form-label'>Student ID</label>
+
+<input tye='text' class='form-control form-field' name='id' id='id' readonly/>
+
+<label class='form-label'>Name</label>
+
+<input type='text' class='form-control form-field' name='name' id='name' required/>
+
+<label class='form-label'>Year of birth</label>
+
+<input type='number' class='form-control form-field' name='yob' id='yob' required/>
+<br>
+
+<input type='button' class="btn" value='Save' onclick='saveOrUpdate();' />
+
+<input type='button' class="btn" value='Add new' onclick='add();' />
+
+<input type='button' class="btn" value='Remove' onclick="remove();" />
+
+    </div>
+    </div>
+
+
+    </div>
+    </div>
+    </div>
+</div>
+
+</div>

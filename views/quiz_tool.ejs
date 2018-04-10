@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Quiz Tool</title>
+  <link rel="shortcut icon" href="http://www.rmit.edu.vn/sites/all/themes/rmit/images/rmit-university-vietnam.jpg" type="image/x-icon" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<style>
+.form-field {
+	 border: solid 2px #006699;
+}
+#quizpanel1 {
+  background-color: #006699; 
+  color: #FFFFFF;
+  border-color:  #006699;
+
+}
+
+#quizpanel {
+  background-color: #000000; 
+  color: #FFFFFF;
+  border-color:  #000000;
+
+}
+.quizList {
+  background-color: #FFFFFF; 
+  border: solid 2px #000000;
+}
+
+.btn1{
+    background-color: #FFFFFF; 
+    color:  #006699;
+    border: solid 2px  #006699;
+}
+.btn2{
+    background-color:  #006699; 
+  color: #FFFFFF;
+  border-color:  #006699;
+}
+h3 {
+	color: #006699;
+}
+
+
+label {
+  color: #006699;
+}
+</style>
+
+<!-- ADD QUIZ DATA TO MONGODB  -->
+<script>
+
+$(function(){
+
+$.ajax({
+
+url: "/quizes",
+
+method: "get",
+
+success: function(data){
+
+for(i=0; i<data.length; i++){
+
+$('#quizList').append("<a class='list-group-item' quizName='"+data[i].name+"' quizId='"+data[i]._id+"'>"+data[i].name+"</a>");
+
+}
+
+}
+
+});
+
+$('#quizList').on('click', 'a', function(){
+id = $(this).attr("quizId");
+name = $(this).attr("quizName");
+
+
+  $('#selectedQuiz').html(id);
+    $('#selectedQuizName').html(name);
+        
+
+      //now get all enrolled students of this course
+    //clear before append
+    $('#addedQuestions').html('');
+
+    $.ajax({
+      url: 'questionByQuiz/'+id,
+      method: 'get',
+      success: function(data){
+        for(i=0; i<data.length; i++){ 
+          $('#addedQuestions').append("<a class='list-group-item' value='"+data[i]._id+"'>"+data[i].name+"</a>");
+        }
+      }
+    });
+
+    //now get all available students who have not enrolled to this course
+    //clear before append
+    $('#availableQuestions').html('');
+    $.ajax({
+      url: 'availableQuestionByQuiz/'+id,
+      method: 'get',
+      success: function(data){
+        console.log(data);
+        for(i=0; i<data.length; i++){ 
+          $('#availableQuestions').append("<a class='list-group-item' value='"+data[i]._id+"' >"+data[i].name+"</a>");
+        }
+      }
+    });
+    //
+      $('#availableQuestions').on('dblclick', 'a', function(){
+    var id = $(this).attr('value');
+    var questionadd = {'quizId': $('#selectedQuiz').html() , 'questionId': id};
+
+    $.ajax({
+      url: '/questionadd',
+      method: 'post',
+      data: questionadd,
+      success: function(doc){
+        alert('Success');
+      }
+
+    });
+    $(this).remove();
+     location.reload();
+  }); 
+
+$.ajax({
+
+url: "/quiz/"+id,
+
+method: "get",
+
+success: function(data){
+
+$('#name').val(data.name);
+
+$('#time').val(data.time);
+
+$('#id').val(data._id);
+
+$('#question').val(data._question);
+
+$('#questionPrompt').val(data._questionPrompt);
+
+$('#answer').val(data._answer);
+
+
+
+}
+
+});
+
+});
+
+});
+
+function saveOrUpdate(){
+
+id = $('#id').val();
+
+if(id==='')
+
+add();
+
+else
+
+update();
+
+}
+
+function update(){
+
+quiz = {"name": $('#name').val(), "time": $('#time').val(), "question": $('#question').val(), "questionPrompt": $('#questionPrompt').val(), "answer": $('#answer').val() };
+id = $('#id').val();
+
+$.ajax({
+
+url: "/quiz/"+id,
+
+method: "put",
+
+dataType: "json",
+
+data: quiz,
+
+success: function(data){
+
+$('#quizList').append("<a class='list-group-item' quizName='"+data[i].name+"' quizId='"+data[i]._id+"'>"+data.name+"</a>");
+}
+
+});
+location.reload();
+}
+
+function add(){
+
+quiz ={"name": $('#name').val(), "time": $('#time').val(), "question": $('#question').val(), "questionPrompt": $('#questionPrompt').val(), "answer": $('#answer').val() };
+
+$.ajax({
+
+url: "/quizes",
+
+method: "post",
+
+dataType: "json",
+
+data: quiz,
+
+success: function(data){
+
+$('#quizList').append("<a class='list-group-item' quizName='"+data[i].name+"' quizId='"+data[i]._id+"'>"+data.name+"</a>");
+
+}
+
+});
+
+}
+
+function remove(){
+ if (confirm('Do you want to remove this quiz?')) {
+id = $('#id').val();
+
+$.ajax({
+
+url: "/quiz/"+id,
+
+method: "delete",
+
+dataType: "json",
+
+success: function(data){
+
+alert('Remove successfully');
+location.reload();
+}
+
+});
+}
+}
+
+</script>
+
+
+<!--    -->
+</head>
+<body> 
+<div class="container-fluid" ; style="text-align:center">
+ <div class="row"> 
+ <div class="col-sm-3">
+ <img src="https://astrolightvic.files.wordpress.com/2016/08/rmit-logo.png" class="img-fluid" alt="Responsive image" style="width: 50%">
+ </div>
+ 
+
+
+    
+  </div>
+<br>
+<div class="row"> 
+<!-- QUIZ MANAGEMENT TOOL -->
+      <div class="panel panel-default" style="text-align:center ; font-weight: bold ">
+    <div class="panel-heading" id="quizpanel">QUIZ DATABASE </div>
+    
+    <div class="panel-body" id="quizbody">
+<div class="col-sm-5">
+<strong><h4>Quiz List</h4></strong>
+<div id='quizList' class='list-group'> </div>
+<br>
+<br>
+    </div>
+
+<div class="col-sm-7">
+ <div class="panel panel-default" style="text-align:center ; font-weight: bold ">
+    <div class="panel-heading" id="quizpanel1">Quiz Form </div>
+    
+    <div class="panel-body" id="quizbody">
+   
+     <label class='form-label'>Quiz ID</label>
+
+<input tye='text' class='form-control form-field' name='id' id='id' readonly/>
+
+<label class='form-label'>Name</label>
+
+<input type='text' class='form-control form-field' name='name' id='name' required/>
+
+<label class='form-label'>Time Limit</label>
+
+<input type='number' class='form-control form-field' name='time' id='time' required/>
+<br>
+<input type='button' class="btn btn2" value='Save Quiz' onclick='saveOrUpdate();' />
+
+<input type='button' class="btn btn2" value='Add Quiz' onclick='add();' />
+
+<input type='button' class="btn btn2" value='Remove Quiz' onclick="remove();" />
+</form>
+    </div>
+
+</div>
+<br>
+<!--   -->
+<div class="panel panel-default" style="font-weight: bold ; ">
+    <div class="panel-heading" style="background-color: #000000; color: #FFFFFF; text-align: center;" >
+        <h4> Question Add To Quiz Tool </h4>
+     </div>
+    <div class="panel-body">
+<div style ="border: 2px solid #006699; border-radius: 25px; ">
+ <h4>Selected Quiz ID: <span id='selectedQuiz'></span></h4>
+        <h4>Selected Quiz Name: <span id='selectedQuizName'></span></h4>
+       
+</div>
+<br>
+<label class='form-label'>Available Questions</label>
+ <div id='availableQuestions'></div>
+ <br>
+ <label class='form-label'>Added Questions</label>
+<div id='addedQuestions'></div>
+    
+
+
+<br><br>
+
+
+  </div>
+    </div>
+
+      </div>
+
+      </div>
+      </div>
+      </div>
+      </div>
+
+      
+</body>
+</html>
